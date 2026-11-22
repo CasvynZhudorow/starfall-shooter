@@ -1,0 +1,58 @@
+# Gradle
+.gradle/
+build/
+*/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration
+local.properties
+*.iml
+.idea/
+*.iws
+*.ipr
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Android
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.o
+*.so
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Keystore
+keystore.jks
+*.keystore
+*.jks
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Temporary
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Coverage
+*.ec
+coverage/
+
+# Asset generation (optional - commit generated assets if desired)
+# android/assets/models/*.g3db
+# android/assets/textures/*.png

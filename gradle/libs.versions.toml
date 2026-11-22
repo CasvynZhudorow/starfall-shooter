@@ -1,0 +1,46 @@
+[versions]
+agp = "8.4.0"
+kotlin = "1.9.22"
+libgdx = "1.12.1"
+ashley = "1.7.4"
+box2d = "1.12.1"
+gdx-freetype = "1.12.1"
+junit = "4.13.2"
+espresso = "3.5.1"
+androidx-activity = "1.9.0"
+androidx-appcompat = "1.6.1"
+material = "1.11.0"
+core-ktx = "1.12.0"
+constraintlayout = "2.1.4"
+truth = "1.1.3"
+
+[libraries]
+# Android
+androidx-activity = { group = "androidx.activity", name = "activity-ktx", version.ref = "androidx-activity" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version = "1.5.2" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version = "1.5.0" }
+
+# LibGDX
+libgdx = { group = "com.badlogicgames.gdx", name = "gdx", version.ref = "libgdx" }
+libgdx-box2d = { group = "com.badlogicgames.gdx", name = "gdx-box2d", version.ref = "box2d" }
+libgdx-freetype = { group = "com.badlogicgames.gdx", name = "gdx-freetype", version.ref = "gdx-freetype" }
+libgdx-platform = { group = "com.badlogicgames.gdx", name = "gdx-platform", version.ref = "libgdx" }
+libgdx-box2d-platform = { group = "com.badlogicgames.gdx", name = "gdx-box2d-platform", version.ref = "box2d" }
+libgdx-freetype-platform = { group = "com.badlogicgames.gdx", name = "gdx-freetype-platform", version.ref = "gdx-freetype" }
+
+# Ashley ECS
+ashley = { group = "com.badlogicgames.ashley", name = "ashley", version.ref = "ashley" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
