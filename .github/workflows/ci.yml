@@ -21,6 +21,16 @@ jobs:
           fetch-depth: 0
           clean: true
 
+      - name: Debug - verify checkout
+        run: |
+          echo "=== EntityFactory.kt imports ==="
+          head -45 core/src/main/kotlin/com/example/shooter/ecs/EntityFactory.kt
+          echo "=== GameWorld.kt imports ==="
+          head -35 core/src/main/kotlin/com/example/shooter/ecs/GameWorld.kt
+          echo "=== Git status ==="
+          git status
+          git log --oneline -3
+
       - name: Setup JDK 21
         uses: actions/setup-java@v4
         with:
@@ -84,6 +94,16 @@ jobs:
         with:
           fetch-depth: 0
           clean: true
+
+      - name: Debug - verify checkout
+        run: |
+          echo "=== EntityFactory.kt imports ==="
+          head -45 core/src/main/kotlin/com/example/shooter/ecs/EntityFactory.kt
+          echo "=== GameWorld.kt imports ==="
+          head -35 core/src/main/kotlin/com/example/shooter/ecs/GameWorld.kt
+          echo "=== Git status ==="
+          git status
+          git log --oneline -3
 
       - name: Setup JDK 21
         uses: actions/setup-java@v4
