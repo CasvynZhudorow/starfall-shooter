@@ -21,7 +21,7 @@ import com.example.shooter.util.ModelGenerator
 class EntityFactory(private val engine: PooledEngine, private val assetManager: AssetManager) {
     private val entitiesToRemove = Array<Entity>()
     private var nextEntityId = 0
-    private val entityIdMap = mutableMapOf<Entity, Int>()
+    internal val entityIdMap = mutableMapOf<Entity, Int>()
     
     fun createPlayer(shipType: ShipType = ShipType.BALANCED, x: Float = 400f, y: Float = 200f): Entity {
         val entity = engine.createEntity()
@@ -97,7 +97,7 @@ class EntityFactory(private val engine: PooledEngine, private val assetManager: 
         return entity
     }
     
-    private fun configureWeapon(weapon: WeaponComponent, shipType: ShipType, level: Int) {
+    internal fun configureWeapon(weapon: WeaponComponent, shipType: ShipType, level: Int) {
         when (shipType) {
             ShipType.INTERCEPTOR -> {
                 weapon.fireRate = 0.08f / level
@@ -378,13 +378,17 @@ class EntityFactory(private val engine: PooledEngine, private val assetManager: 
         }
         
         val particle = engine.createComponent(ParticleComponent::class.java).apply {
-            val effect = ParticleEffect()
             // Load explosion particle
             if (assetManager.isLoaded("particles/explosion.p")) {
-                effect.load(assetManager.get("particles/explosion.p", ParticleEffect::class.java))
+                val effect = assetManager.get("particles/explosion.p", ParticleEffect::class.java)
+                emitter = effect.emitters.firstOrNull()
+                isPlaying = true
+            } else {
+                val effect = ParticleEffect()
+                // Could load from file here if needed
+                emitter = effect.emitters.firstOrNull()
+                isPlaying = true
             }
-            emitter = effect.emitters.firstOrNull()
-            isPlaying = true
         }
         
         entity.add(transform)
@@ -396,7 +400,7 @@ class EntityFactory(private val engine: PooledEngine, private val assetManager: 
             com.badlogic.ashley.core.Family.all(TransformComponent::class.java, EnemyComponent::class.java, HealthComponent::class.java).get()
         )
         
-        for (i in 0 until entities.size) {
+        for (i in 0 until entities.size()) {
             val e = entities.get(i)
             val t = e.getComponent(TransformComponent::class.java)
             val dx = t.position.x - x
@@ -418,16 +422,16 @@ class EntityFactory(private val engine: PooledEngine, private val assetManager: 
             com.badlogic.ashley.core.Family.all(TransformComponent::class.java, EnemyComponent::class.java).get()
         )
         
-        if (enemies.size == 0) return
-        
-        repeat(count) { i ->
-            val target = enemies.get(MathUtils.random(enemies.size - 1))
-            val targetTransform = target.getComponent(TransformComponent::class.java)
-            
-            val projectile = createProjectile(x, y, 0f, -500f, damage, ProjectileOwner.PLAYER, false, true)
-            val projComp = projectile.getComponent(ProjectileComponent::class.java)
-            projComp.homingTarget = entityIdMap[target] ?: -1
-        }
+        if (enemies.size() == 0) return
+
+                repeat(count) { i ->
+                    val target = enemies.get(MathUtils.random(enemies.size() - 1))
+                    val targetTransform = target.getComponent(TransformComponent::class.java)
+
+                    val projectile = createProjectile(x, y, 0f, -500f, damage, ProjectileOwner.PLAYER, false, true)
+                    val projComp = projectile.getComponent(ProjectileComponent::class.java)
+                    projComp.homingTarget = entityIdMap[target] ?: -1
+                }
     }
     
     fun markForRemoval(entity: Entity) {

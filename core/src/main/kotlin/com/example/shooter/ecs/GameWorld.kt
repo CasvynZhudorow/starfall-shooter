@@ -158,7 +158,7 @@ class GameWorld(
         
         if (stageComp.isBossStage) {
             // Check if boss is dead
-            val bossEntity = engine.getEntity(stageComp.bossEntityId)
+            val bossEntity = entityFactory.entityIdMap.entries.firstOrNull { it.value == stageComp.bossEntityId }?.key
             if (bossEntity == null || bossEntity.getComponent(HealthComponent::class.java)?.isDead == true) {
                 stageClear()
             }
@@ -167,9 +167,9 @@ class GameWorld(
             val enemies = engine.getEntitiesFor(
                 com.badlogic.ashley.core.Family.all(EnemyComponent::class.java).get()
             )
-            stageComp.enemiesRemaining = enemies.size
-            
-            if (enemies.size == 0 && enemiesInWave == 0) {
+            stageComp.enemiesRemaining = enemies.size()
+
+            if (enemies.size() == 0 && enemiesInWave == 0) {
                 spawnNextWave()
             }
         }
@@ -334,7 +334,7 @@ class GameWorld(
             if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) velocity.velocity.y = -velocity.maxSpeed
 
             // Ultimate activation (Space or U key)
-            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+            if (Gdx.input.isKeyPressed(Input.Keys.SPACE) || Gdx.input.isKeyPressed(Input.Keys.U)) {
                 tryActivateUltimate()
             }
         }
