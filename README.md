@@ -96,4 +96,4 @@ All 3D models and textures are AI-generated. See `assets/prompts/models.md` for 
 Place generated `.g3db` models in `android/assets/models/`.
 
 ## License
-MIT - Free to use, modify, distribute.
+MIT - Free to use, modify, distribute.# Force fresh CI run Mon 23 Nov 13:38:55 WIB 2026
