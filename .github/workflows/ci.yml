@@ -27,6 +27,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      - name: Clean build
+        run: bash ./gradlew clean --no-daemon --no-build-cache
+
       - name: Build Debug APK
         run: bash ./gradlew :android:assembleDebug --no-daemon --stacktrace --no-build-cache
 
@@ -57,6 +60,9 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
+
+      - name: Clean build
+        run: bash ./gradlew clean --no-daemon --no-build-cache
 
       - name: Run Android Lint
         run: bash ./gradlew :android:lintDebug --no-daemon --stacktrace --no-build-cache
