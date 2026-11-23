@@ -39,7 +39,7 @@ jobs:
         run: bash ./gradlew clean --no-daemon --no-build-cache
 
       - name: Build Debug APK
-        run: bash ./gradlew :android:assembleDebug --no-daemon --stacktrace --no-build-cache
+        run: bash ./gradlew :android:assembleDebug --no-daemon --stacktrace --no-build-cache --info
 
       - name: Run Unit Tests
         run: bash ./gradlew :core:test --no-daemon --stacktrace --no-build-cache
@@ -81,7 +81,7 @@ jobs:
         run: bash ./gradlew clean --no-daemon --no-build-cache
 
       - name: Run Android Lint
-        run: bash ./gradlew :android:lintDebug --no-daemon --stacktrace --no-build-cache
+        run: bash ./gradlew :android:lintDebug --no-daemon --stacktrace --no-build-cache --info
 
       - name: Upload Lint Report
         uses: actions/upload-artifact@v4
