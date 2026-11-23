@@ -15,7 +15,27 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.Array
-import com.example.shooter.ecs.Components.*
+import com.example.shooter.ecs.Components.TransformComponent
+import com.example.shooter.ecs.Components.VelocityComponent
+import com.example.shooter.ecs.Components.PlayerComponent
+import com.example.shooter.ecs.Components.ShipType
+import com.example.shooter.ecs.Components.WeaponComponent
+import com.example.shooter.ecs.Components.UltimateComponent
+import com.example.shooter.ecs.Components.UltimateType
+import com.example.shooter.ecs.Components.HealthComponent
+import com.example.shooter.ecs.Components.CollisionComponent
+import com.example.shooter.ecs.Components.ModelComponent
+import com.example.shooter.ecs.Components.ScreenShakeComponent
+import com.example.shooter.ecs.Components.EnemyComponent
+import com.example.shooter.ecs.Components.EnemyType
+import com.example.shooter.ecs.Components.MovePattern
+import com.example.shooter.ecs.Components.ShootPattern
+import com.example.shooter.ecs.Components.ProjectileComponent
+import com.example.shooter.ecs.Components.ProjectileOwner
+import com.example.shooter.ecs.Components.PickupComponent
+import com.example.shooter.ecs.Components.PickupType
+import com.example.shooter.ecs.Components.ParticleComponent
+import com.example.shooter.ecs.Components.StageComponent
 import com.example.shooter.util.ModelGenerator
 
 class EntityFactory(private val engine: PooledEngine, private val assetManager: AssetManager) {
@@ -424,14 +444,14 @@ class EntityFactory(private val engine: PooledEngine, private val assetManager: 
         
         if (enemies.size() == 0) return
 
-                repeat(count) { i ->
-                    val target = enemies.get(MathUtils.random(enemies.size() - 1))
-                    val targetTransform = target.getComponent(TransformComponent::class.java)
+        repeat(count) { i ->
+            val target = enemies.get(MathUtils.random(enemies.size() - 1))
+            val targetTransform = target.getComponent(TransformComponent::class.java)
 
-                    val projectile = createProjectile(x, y, 0f, -500f, damage, ProjectileOwner.PLAYER, false, true)
-                    val projComp = projectile.getComponent(ProjectileComponent::class.java)
-                    projComp.homingTarget = entityIdMap[target] ?: -1
-                }
+            val projectile = createProjectile(x, y, 0f, -500f, damage, ProjectileOwner.PLAYER, false, true)
+            val projComp = projectile.getComponent(ProjectileComponent::class.java)
+            projComp.homingTarget = entityIdMap[target] ?: -1
+        }
     }
     
     fun markForRemoval(entity: Entity) {
