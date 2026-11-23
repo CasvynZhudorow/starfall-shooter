@@ -28,10 +28,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 34
-          ndk-version: r26c
-          build-tools-version: 34.0.0
-          cmake-version: 3.22.1
+          packages: platform-tools build-tools;34.0.0 cmake;3.22.1 ndk;r26c platform;android-34
+          cmdline-tools-version: latest
           cache: gradle
 
       - name: Cache Gradle packages
@@ -111,7 +109,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: ${{ matrix.api-level }}
+          packages: platform-tools build-tools;34.0.0 platform;android-${{ matrix.api-level }}
+          cmdline-tools-version: latest
           emulator: true
           arch: x86_64
 
