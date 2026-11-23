@@ -1,6 +1,6 @@
 [versions]
 agp = "8.4.0"
-kotlin = "1.9.22"
+kotlin = "2.0.0"
 libgdx = "1.12.1"
 ashley = "1.7.4"
 box2d = "1.12.1"

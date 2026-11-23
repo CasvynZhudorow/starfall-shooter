@@ -7,9 +7,12 @@ import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g3d.ModelBatch
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider
 import com.badlogic.gdx.math.MathUtils
@@ -29,23 +32,35 @@ class GameScreen(private val game: ShooterGame) : ScreenAdapter() {
     private var isPaused = false
     
     // UI state
-    private var score = 0L
-    private var lives = 3
-    private var weaponLevel = 1
-    private var ultimateCurrent = 0f
-    private var ultimateMax = 100f
-    private var ultimateActive = false
-    private var ultimateTypeName = ""
-    
-    init {
-        font.getData().setScale(1.5f)
-        font.color = Color.WHITE
-        
-        camera = OrthographicCamera(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
-        camera.position.set(Gdx.graphics.width / 2f, Gdx.graphics.height / 2f, 0f)
-        camera.update()
-        
-        gameWorld = GameWorld(game, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+        private var score = 0L
+        private var lives = 3
+        private var weaponLevel = 1
+        private var ultimateCurrent = 0f
+        private var ultimateMax = 100f
+        private var ultimateActive = false
+        private var ultimateTypeName = ""
+
+        // White 1x1 texture for UI drawing
+        private val whiteTexture: Texture
+        private val whiteRegion: TextureRegion
+
+        init {
+            font.data.setScale(1.5f)
+            font.color = Color.WHITE
+
+            // Create white 1x1 texture
+            val pixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+            pixmap.color = Color.WHITE
+            pixmap.fill()
+            whiteTexture = Texture(pixmap)
+            pixmap.dispose()
+            whiteRegion = TextureRegion(whiteTexture)
+
+            camera = OrthographicCamera(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+            camera.position.set(Gdx.graphics.width / 2f, Gdx.graphics.height / 2f, 0f)
+            camera.update()
+
+            gameWorld = GameWorld(game, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
         
         // Setup callbacks
         gameWorld.onScoreChange = { score = it }
@@ -108,7 +123,7 @@ class GameScreen(private val game: ShooterGame) : ScreenAdapter() {
                 instance.transform.setToTranslation(transform.position.x, transform.position.y, transform.zIndex)
                 instance.transform.rotate(0f, 0f, 1f, transform.rotation)
                 instance.transform.scale(transform.scale.x, transform.scale.y, 1f)
-                modelBatch.render(instance, gameWorld.engine.getSystem(com.example.shooter.ecs.Systems::class.java)?.environment)
+                modelBatch.render(instance)
             }
         }
         modelBatch.end()
@@ -135,11 +150,11 @@ class GameScreen(private val game: ShooterGame) : ScreenAdapter() {
         renderUI()
         
         // Handle pause
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            isPaused = !isPaused
-        }
-        
-        if (isPaused) {
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                    isPaused = !isPaused
+                }
+
+                if (isPaused) {
             renderPauseMenu()
         }
     }
@@ -163,26 +178,26 @@ class GameScreen(private val game: ShooterGame) : ScreenAdapter() {
         font.draw(spriteBatch, layout, 20f, Gdx.graphics.height.toFloat() - 80f)
         
         // Ultimate Meter
-        val ultimateBgWidth = 200f
-        val ultimateBgHeight = 20f
-        val ultimateX = Gdx.graphics.width - ultimateBgWidth - 20f
-        val ultimateY = Gdx.graphics.height.toFloat() - 40f
-        
-        // Background
-        spriteBatch.draw(
-            com.badlogic.gdx.graphics.g2d.TextureRegion.getWhiteRegion(),
-            ultimateX, ultimateY, ultimateBgWidth, ultimateBgHeight,
-            Color.DARK_GRAY
-        )
-        
-        // Fill
-        val fillWidth = (ultimateCurrent / ultimateMax) * ultimateBgWidth
-        val fillColor = if (ultimateCurrent >= ultimateMax) Color.GOLD else Color.CYAN
-        spriteBatch.draw(
-            com.badlogic.gdx.graphics.g2d.TextureRegion.getWhiteRegion(),
-            ultimateX, ultimateY, fillWidth, ultimateBgHeight,
-            fillColor
-        )
+                val ultimateBgWidth = 200f
+                val ultimateBgHeight = 20f
+                val ultimateX = Gdx.graphics.width - ultimateBgWidth - 20f
+                val ultimateY = Gdx.graphics.height.toFloat() - 40f
+
+                // Background
+                spriteBatch.draw(
+                    whiteRegion,
+                    ultimateX, ultimateY, ultimateBgWidth, ultimateBgHeight,
+                    Color.DARK_GRAY
+                )
+
+                // Fill
+                val fillWidth = (ultimateCurrent / ultimateMax) * ultimateBgWidth
+                val fillColor = if (ultimateCurrent >= ultimateMax) Color.GOLD else Color.CYAN
+                spriteBatch.draw(
+                    whiteRegion,
+                    ultimateX, ultimateY, fillWidth, ultimateBgHeight,
+                    fillColor
+                )
         
         // Ultimate text
         val ultimateText = if (ultimateActive) "ULTIMATE: $ultimateTypeName ACTIVE!" else "ULTIMATE: ${(ultimateCurrent / ultimateMax * 100).toInt()}%"
@@ -198,17 +213,17 @@ class GameScreen(private val game: ShooterGame) : ScreenAdapter() {
     }
     
     private fun renderPauseMenu() {
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-        
-        spriteBatch.begin()
-        
-        // Dark overlay
-        spriteBatch.draw(
-            com.badlogic.gdx.graphics.g2d.TextureRegion.getWhiteRegion(),
-            0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat(),
-            Color.BLACK.cpy().apply { a = 0.7f }
-        )
+            Gdx.gl.glEnable(GL20.GL_BLEND)
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+            spriteBatch.begin()
+
+            // Dark overlay
+            spriteBatch.draw(
+                whiteRegion,
+                0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat(),
+                Color.BLACK.cpy().apply { a = 0.7f }
+            )
         
         val pauseText = "PAUSED"
         layout.setText(font, pauseText)
@@ -245,6 +260,7 @@ class GameScreen(private val game: ShooterGame) : ScreenAdapter() {
         modelBatch.dispose()
         spriteBatch.dispose()
         font.dispose()
+        whiteTexture.dispose()
         gameWorld.dispose()
     }
 }

@@ -5,9 +5,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.example.shooter.ShooterGame
 
 class StageClearScreen(
@@ -25,18 +28,30 @@ class StageClearScreen(
     private val menuFont = BitmapFont()
     private val layout = GlyphLayout()
     private var timer = 0f
-    private var canContinue = false
-    
-    init {
-        titleFont.getData().setScale(4f)
-        titleFont.color = Color.GOLD
-        
-        infoFont.getData().setScale(2f)
-        infoFont.color = Color.WHITE
-        
-        menuFont.getData().setScale(2f)
-        menuFont.color = Color.GREEN
-    }
+        private var canContinue = false
+
+        // White 1x1 texture for UI drawing
+        private val whiteTexture: Texture
+        private val whiteRegion: TextureRegion
+
+        init {
+            titleFont.data.setScale(4f)
+            titleFont.color = Color.GOLD
+
+            infoFont.data.setScale(2f)
+            infoFont.color = Color.WHITE
+
+            menuFont.data.setScale(2f)
+            menuFont.color = Color.GREEN
+
+            // Create white 1x1 texture
+            val pixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+            pixmap.setColor(Color.WHITE)
+            pixmap.fill()
+            whiteTexture = Texture(pixmap)
+            pixmap.dispose()
+            whiteRegion = TextureRegion(whiteTexture)
+        }
     
     override fun render(delta: Float) {
         Gdx.gl.glClearColor(0.02f, 0.1f, 0.02f, 1f)
@@ -50,14 +65,14 @@ class StageClearScreen(
     }
     
     private fun handleInput() {
-        if (canContinue && (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER) || 
-            Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.SPACE) || Gdx.input.justTouched())) {
-            game.setScreen(com.example.shooter.screen.GameScreen(game))
+            if (canContinue && (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER) ||
+                Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.SPACE) || Gdx.input.justTouched())) {
+                game.setScreen(com.example.shooter.screen.GameScreen(game))
+            }
+            if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
+                game.setScreen(MainMenuScreen(game))
+            }
         }
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
-            game.setScreen(MainMenuScreen(game))
-        }
-    }
     
     private fun renderUI() {
         batch.begin()
@@ -94,7 +109,7 @@ class StageClearScreen(
         // Continue prompt
         if (canContinue) {
             val prompt = "Tap or Press ENTER to Continue"
-            val alpha = (Math.sin(timer * 4f) * 0.5f + 0.5f)
+            val alpha = ((Math.sin(timer * 4f) * 0.5 + 0.5) as Float)
             menuFont.color = Color.GREEN.cpy().apply { this.a = alpha }
             layout.setText(menuFont, prompt)
             menuFont.draw(batch, layout, (Gdx.graphics.width - layout.width) / 2f, Gdx.graphics.height * 0.2f)
@@ -108,5 +123,6 @@ class StageClearScreen(
         titleFont.dispose()
         infoFont.dispose()
         menuFont.dispose()
+        whiteTexture.dispose()
     }
 }

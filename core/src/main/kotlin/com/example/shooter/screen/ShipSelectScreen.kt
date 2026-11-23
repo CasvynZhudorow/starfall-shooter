@@ -5,9 +5,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.example.shooter.ShooterGame
 import com.example.shooter.ecs.Components.ShipType
 
@@ -42,20 +45,32 @@ class ShipSelectScreen(private val game: ShooterGame) : ScreenAdapter() {
     )
     
     private data class ShipData(
-        val type: ShipType,
-        val name: String,
-        val desc: String,
-        val ultimateDesc: String,
-        val color: Color
-    )
-    
-    init {
-        titleFont.getData().setScale(3f)
-        titleFont.color = Color.GOLD
-        
-        infoFont.getData().setScale(1.5f)
-        infoFont.color = Color.WHITE
-    }
+            val type: ShipType,
+            val name: String,
+            val desc: String,
+            val ultimateDesc: String,
+            val color: Color
+        )
+
+        // White 1x1 texture for UI drawing
+        private val whiteTexture: Texture
+        private val whiteRegion: TextureRegion
+
+        init {
+            titleFont.data.setScale(3f)
+            titleFont.color = Color.GOLD
+
+            infoFont.data.setScale(1.5f)
+            infoFont.color = Color.WHITE
+
+            // Create white 1x1 texture
+            val pixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+            pixmap.color = Color.WHITE
+            pixmap.fill()
+            whiteTexture = Texture(pixmap)
+            pixmap.dispose()
+            whiteRegion = TextureRegion(whiteTexture)
+        }
     
     override fun render(delta: Float) {
         Gdx.gl.glClearColor(0.05f, 0.05f, 0.15f, 1f)
@@ -66,26 +81,26 @@ class ShipSelectScreen(private val game: ShooterGame) : ScreenAdapter() {
     }
     
     private fun handleInput() {
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.LEFT) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.A)) {
-            selectedIndex = (selectedIndex - 1 + ships.size) % ships.size
+            if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.LEFT) || Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.A)) {
+                selectedIndex = (selectedIndex - 1 + ships.size) % ships.size
+            }
+            if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.RIGHT) || Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.D)) {
+                selectedIndex = (selectedIndex + 1) % ships.size
+            }
+            if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.SPACE)) {
+                confirmSelection()
+            }
+            if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
+                game.setScreen(MainMenuScreen(game))
+            }
+
+            // Touch support
+            if (Gdx.input.justTouched()) {
+                val x = Gdx.input.getX()
+                val shipWidth = Gdx.graphics.width / 3f
+                selectedIndex = (x / shipWidth).toInt().coerceIn(0, ships.size - 1)
+            }
         }
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.RIGHT) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.D)) {
-            selectedIndex = (selectedIndex + 1) % ships.size
-        }
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.SPACE)) {
-            confirmSelection()
-        }
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
-            game.setScreen(MainMenuScreen(game))
-        }
-        
-        // Touch support
-        if (Gdx.input.justTouched()) {
-            val x = Gdx.input.getX()
-            val shipWidth = Gdx.graphics.width / 3f
-            selectedIndex = (x / shipWidth).toInt().coerceIn(0, ships.size - 1)
-        }
-    }
     
     private fun confirmSelection() {
         val selectedShip = ships[selectedIndex]
@@ -116,27 +131,27 @@ class ShipSelectScreen(private val game: ShooterGame) : ScreenAdapter() {
             val isSelected = i == selectedIndex
             
             // Card background
-            val bgColor = if (isSelected) ship.color.cpy().apply { a = 0.3f } else Color.DARK_GRAY.cpy().apply { a = 0.8f }
-            batch.draw(
-                com.badlogic.gdx.graphics.g2d.TextureRegion.getWhiteRegion(),
-                x, cardY, cardWidth, cardHeight,
-                bgColor
-            )
-            
-            // Border if selected
-            if (isSelected) {
-                batch.draw(
-                    com.badlogic.gdx.graphics.g2d.TextureRegion.getWhiteRegion(),
-                    x - 2f, cardY - 2f, cardWidth + 4f, cardHeight + 4f,
-                    ship.color
-                )
-                // Redraw background on top
-                batch.draw(
-                    com.badlogic.gdx.graphics.g2d.TextureRegion.getWhiteRegion(),
-                    x, cardY, cardWidth, cardHeight,
-                    bgColor
-                )
-            }
+                        val bgColor = if (isSelected) ship.color.cpy().apply { a = 0.3f } else Color.DARK_GRAY.cpy().apply { a = 0.8f }
+                        batch.draw(
+                            whiteRegion,
+                            x, cardY, cardWidth, cardHeight,
+                            bgColor
+                        )
+
+                        // Border if selected
+                        if (isSelected) {
+                            batch.draw(
+                                whiteRegion,
+                                x - 2f, cardY - 2f, cardWidth + 4f, cardHeight + 4f,
+                                ship.color
+                            )
+                            // Redraw background on top
+                            batch.draw(
+                                whiteRegion,
+                                x, cardY, cardWidth, cardHeight,
+                                bgColor
+                            )
+                        }
             
             // Ship name
             layout.setText(titleFont, ship.name)
@@ -173,46 +188,50 @@ class ShipSelectScreen(private val game: ShooterGame) : ScreenAdapter() {
     }
     
     private fun drawStatBar(x: Float, y: Float, width: Float, label: String, value: Float) {
-        infoFont.color = Color.WHITE
-        layout.setText(infoFont, label)
-        infoFont.draw(batch, layout, x, y + 15f)
-        
-        // Background
-        batch.draw(
-            com.badlogic.gdx.graphics.g2d.TextureRegion.getWhiteRegion(),
-            x, y, width, 10f,
-            Color.DARK_GRAY
-        )
-        
-        // Fill
-        batch.draw(
-            com.badlogic.gdx.graphics.g2d.TextureRegion.getWhiteRegion(),
-            x, y, width * value, 10f,
-            Color.GREEN
-        )
-    }
+            infoFont.color = Color.WHITE
+            layout.setText(infoFont, label)
+            infoFont.draw(batch, layout, x, y + 15f)
+
+            // Background
+            batch.draw(
+                whiteRegion,
+                x, y, width, 10f,
+                Color.DARK_GRAY
+            )
+
+            // Fill
+            batch.draw(
+                whiteRegion,
+                x, y, width * value, 10f,
+                Color.GREEN
+            )
+        }
     
     private fun getSpeedStat(type: ShipType): Float = when (type) {
         ShipType.INTERCEPTOR -> 1.0f
         ShipType.BALANCED -> 0.7f
         ShipType.HEAVY -> 0.4f
+        else -> 0.5f
     }
     
     private fun getPowerStat(type: ShipType): Float = when (type) {
         ShipType.INTERCEPTOR -> 0.5f
         ShipType.BALANCED -> 0.7f
         ShipType.HEAVY -> 1.0f
+        else -> 0.7f
     }
     
     private fun getSpreadStat(type: ShipType): Float = when (type) {
         ShipType.INTERCEPTOR -> 0.3f
         ShipType.BALANCED -> 0.6f
         ShipType.HEAVY -> 1.0f
+        else -> 0.5f
     }
     
     override fun dispose() {
         batch.dispose()
         titleFont.dispose()
         infoFont.dispose()
+        whiteTexture.dispose()
     }
 }

@@ -300,44 +300,44 @@ class GameWorld(
         return ultimateSystem?.tryActivateUltimate(playerEntity!!) ?: false
     }
     
-    fun handleInput(deltaTime: Float) {
-        val player = playerEntity?.getComponent(PlayerComponent::class.java)
-        val velocity = playerEntity?.getComponent(VelocityComponent::class.java)
-        val transform = playerEntity?.getComponent(TransformComponent::class.java)
-        
-        if (player == null || velocity == null || transform == null) return
-        
-        // Touch/mouse movement
-        if (Gdx.input.isTouched()) {
-            val touchX = Gdx.input.getX()
-            val touchY = screenHeight - Gdx.input.getY() // Flip Y
-            
-            val dx = touchX - transform.position.x
-            val dy = touchY - transform.position.y
-            val dist = MathUtils.sqrt(dx * dx + dy * dy)
-            
-            if (dist > 10f) {
-                val speed = velocity.maxSpeed
-                velocity.velocity.x = (dx / dist) * speed
-                velocity.velocity.y = (dy / dist) * speed
+    private fun handleInput(deltaTime: Float) {
+            val player = playerEntity?.getComponent(PlayerComponent::class.java)
+            val velocity = playerEntity?.getComponent(VelocityComponent::class.java)
+            val transform = playerEntity?.getComponent(TransformComponent::class.java)
+
+            if (player == null || velocity == null || transform == null) return
+
+            // Touch/mouse movement
+            if (Gdx.input.isTouched()) {
+                val touchX = Gdx.input.getX()
+                val touchY = screenHeight - Gdx.input.getY() // Flip Y
+
+                val dx = touchX - transform.position.x
+                val dy = touchY - transform.position.y
+                val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+
+                if (dist > 10f) {
+                    val speed = velocity.maxSpeed
+                    velocity.velocity.x = (dx / dist) * speed
+                    velocity.velocity.y = (dy / dist) * speed
+                } else {
+                    velocity.velocity.setZero()
+                }
             } else {
                 velocity.velocity.setZero()
             }
-        } else {
-            velocity.velocity.setZero()
+
+            // Keyboard (for desktop testing)
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) velocity.velocity.x = -velocity.maxSpeed
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) velocity.velocity.x = velocity.maxSpeed
+            if (Gdx.input.isKeyPressed(Input.Keys.UP)) velocity.velocity.y = velocity.maxSpeed
+            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) velocity.velocity.y = -velocity.maxSpeed
+
+            // Ultimate activation (Space or U key)
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+                tryActivateUltimate()
+            }
         }
-        
-        // Keyboard (for desktop testing)
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) velocity.velocity.x = -velocity.maxSpeed
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) velocity.velocity.x = velocity.maxSpeed
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) velocity.velocity.y = velocity.maxSpeed
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) velocity.velocity.y = -velocity.maxSpeed
-        
-        // Ultimate activation (Space or U key)
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.U)) {
-            tryActivateUltimate()
-        }
-    }
     
     fun getCamera(): Camera {
         return OrthographicCamera(screenWidth, screenHeight).apply {

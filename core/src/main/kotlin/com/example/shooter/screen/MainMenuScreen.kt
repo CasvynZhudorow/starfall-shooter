@@ -5,9 +5,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.example.shooter.ShooterGame
 
 class MainMenuScreen(private val game: ShooterGame) : ScreenAdapter() {
@@ -17,14 +20,26 @@ class MainMenuScreen(private val game: ShooterGame) : ScreenAdapter() {
     private val layout = GlyphLayout()
     private var selectedIndex = 0
     private val menuItems = arrayOf("START", "SHIP SELECT", "QUIT")
-    
-    init {
-        titleFont.getData().setScale(4f)
-        titleFont.color = Color.GOLD
-        
-        menuFont.getData().setScale(2f)
-        menuFont.color = Color.WHITE
-    }
+
+        // White 1x1 texture for UI drawing
+        private val whiteTexture: Texture
+        private val whiteRegion: TextureRegion
+
+        init {
+            titleFont.data.setScale(4f)
+            titleFont.color = Color.GOLD
+
+            menuFont.data.setScale(2f)
+            menuFont.color = Color.WHITE
+
+            // Create white 1x1 texture
+            val pixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+            pixmap.color = Color.WHITE
+            pixmap.fill()
+            whiteTexture = Texture(pixmap)
+            pixmap.dispose()
+            whiteRegion = TextureRegion(whiteTexture)
+        }
     
     override fun render(delta: Float) {
         Gdx.gl.glClearColor(0.05f, 0.05f, 0.15f, 1f)
@@ -35,15 +50,15 @@ class MainMenuScreen(private val game: ShooterGame) : ScreenAdapter() {
     }
     
     private fun handleInput() {
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.UP) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.W)) {
-            selectedIndex = (selectedIndex - 1 + menuItems.size) % menuItems.size
-        }
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.S)) {
-            selectedIndex = (selectedIndex + 1) % menuItems.size
-        }
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.SPACE)) {
-            selectMenuItem()
-        }
+            if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.UP) || Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.W)) {
+                selectedIndex = (selectedIndex - 1 + menuItems.size) % menuItems.size
+            }
+            if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.DOWN) || Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.S)) {
+                selectedIndex = (selectedIndex + 1) % menuItems.size
+            }
+            if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.SPACE)) {
+                selectMenuItem()
+            }
         
         // Touch support
         if (Gdx.input.justTouched()) {
@@ -115,5 +130,6 @@ class MainMenuScreen(private val game: ShooterGame) : ScreenAdapter() {
         batch.dispose()
         titleFont.dispose()
         menuFont.dispose()
+        whiteTexture.dispose()
     }
 }

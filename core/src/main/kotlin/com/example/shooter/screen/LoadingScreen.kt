@@ -6,9 +6,12 @@ import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.example.shooter.ShooterGame
 
 class LoadingScreen(private val game: ShooterGame) : ScreenAdapter() {
@@ -16,15 +19,27 @@ class LoadingScreen(private val game: ShooterGame) : ScreenAdapter() {
     private val font = BitmapFont()
     private val layout = GlyphLayout()
     private var progress = 0f
-    private var assetsLoaded = false
-    
-    init {
-        font.getData().setScale(2f)
-        font.color = Color.WHITE
-        
-        // Queue all assets
-        queueAssets()
-    }
+        private var assetsLoaded = false
+
+        // White 1x1 texture for UI drawing
+        private val whiteTexture: Texture
+        private val whiteRegion: TextureRegion
+
+        init {
+            font.data.setScale(2f)
+            font.color = Color.WHITE
+
+            // Create white 1x1 texture
+            val pixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+            pixmap.color = Color.WHITE
+            pixmap.fill()
+            whiteTexture = Texture(pixmap)
+            pixmap.dispose()
+            whiteRegion = TextureRegion(whiteTexture)
+
+            // Queue all assets
+            queueAssets()
+        }
     
     private fun queueAssets() {
         val manager = game.assetManager
@@ -82,5 +97,6 @@ class LoadingScreen(private val game: ShooterGame) : ScreenAdapter() {
     override fun dispose() {
         batch.dispose()
         font.dispose()
+        whiteTexture.dispose()
     }
 }

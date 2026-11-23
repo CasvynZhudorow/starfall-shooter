@@ -70,28 +70,29 @@ class WeaponSystem(priority: Int = 2) : IteratingSystem(
     }
     
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        val weapon = entity.getComponent(WeaponComponent::class.java)
-        val transform = entity.getComponent(TransformComponent::class.java)
-        
-        weapon.fireTimer -= deltaTime
-        
-        if (weapon.fireTimer <= 0f && entityFactory != null) {
-            weapon.fireTimer = weapon.fireRate
-            
-            // Fire projectiles based on pattern
-            when {
-                weapon.projectileCount == 1 && weapon.spreadAngle == 0f -> {
-                    fireStraight(transform, weapon)
-                }
-                weapon.projectileCount > 1 -> {
-                    fireSpread(transform, weapon)
-                }
-                weapon.isHoming -> {
-                    fireHoming(transform, weapon)
+            val weapon = entity.getComponent(WeaponComponent::class.java)
+            val transform = entity.getComponent(TransformComponent::class.java)
+
+            weapon.fireTimer -= deltaTime
+
+            if (weapon.fireTimer <= 0f && entityFactory != null) {
+                weapon.fireTimer = weapon.fireRate
+
+                // Fire projectiles based on pattern
+                when {
+                    weapon.projectileCount == 1 && weapon.spreadAngle == 0f -> {
+                        fireStraight(transform, weapon)
+                    }
+                    weapon.projectileCount > 1 -> {
+                        fireSpread(transform, weapon)
+                    }
+                    weapon.isHoming -> {
+                        fireHoming(transform, weapon)
+                    }
+                    else -> {}
                 }
             }
         }
-    }
     
     private fun fireStraight(transform: TransformComponent, weapon: WeaponComponent) {
         entityFactory?.createProjectile(
@@ -156,25 +157,26 @@ class EnemyAISystem(priority: Int = 3) : IteratingSystem(
     }
     
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        val transform = entity.getComponent(TransformComponent::class.java)
-        val velocity = entity.getComponent(VelocityComponent::class.java)
-        val enemy = entity.getComponent(EnemyComponent::class.java)
-        
-        // Movement patterns
-        when (enemy.movePattern) {
-            MovePattern.STRAIGHT -> {
-                velocity.velocity.y = -enemy.maxSpeed * 0.5f
+            val transform = entity.getComponent(TransformComponent::class.java)
+            val velocity = entity.getComponent(VelocityComponent::class.java)
+            val enemy = entity.getComponent(EnemyComponent::class.java)
+
+            // Movement patterns
+            when (enemy.movePattern) {
+                MovePattern.STRAIGHT -> {
+                    velocity.velocity.y = -velocity.maxSpeed * 0.5f
+                }
+                MovePattern.SINE_WAVE -> {
+                    velocity.velocity.y = -velocity.maxSpeed * 0.4f
+                    velocity.velocity.x = MathUtils.sin(enemy.shootTimer * 3f) * velocity.maxSpeed * 0.6f
+                }
+                MovePattern.CIRCLE -> {
+                    val angle = enemy.shootTimer * 2f
+                    velocity.velocity.x = MathUtils.cos(angle) * velocity.maxSpeed * 0.5f
+                    velocity.velocity.y = -velocity.maxSpeed * 0.3f + MathUtils.sin(angle) * velocity.maxSpeed * 0.2f
+                }
+                MovePattern.BOSS_PHASE_1, MovePattern.BOSS_PHASE_2, MovePattern.BOSS_PHASE_3 -> {}
             }
-            MovePattern.SINE_WAVE -> {
-                velocity.velocity.y = -enemy.maxSpeed * 0.4f
-                velocity.velocity.x = MathUtils.sin(enemy.shootTimer * 3f) * enemy.maxSpeed * 0.6f
-            }
-            MovePattern.CIRCLE -> {
-                val angle = enemy.shootTimer * 2f
-                velocity.velocity.x = MathUtils.cos(angle) * enemy.maxSpeed * 0.5f
-                velocity.velocity.y = -enemy.maxSpeed * 0.3f + MathUtils.sin(angle) * enemy.maxSpeed * 0.2f
-            }
-        }
         
         // Shooting
         enemy.shootTimer += deltaTime
@@ -190,43 +192,44 @@ class EnemyAISystem(priority: Int = 3) : IteratingSystem(
     }
     
     private fun fireEnemyProjectile(transform: TransformComponent, enemy: EnemyComponent) {
-        val playerPos = playerEntity?.getComponent(TransformComponent::class.java)?.position ?: Vector2(400f, 200f)
-        val dx = playerPos.x - transform.position.x
-        val dy = playerPos.y - transform.position.y
-        val dist = MathUtils.sqrt(dx * dx + dy * dy)
-        
-        when (enemy.shootPattern) {
-            ShootPattern.STRAIGHT -> {
-                entityFactory?.createProjectile(
-                    transform.position.x, transform.position.y,
-                    0f, -400f, 10, ProjectileOwner.ENEMY
-                )
-            }
-            ShootPattern.SPREAD_3 -> {
-                val angles = floatArrayOf(-0.3f, 0f, 0.3f)
-                angles.forEach { angle ->
-                    val vx = MathUtils.sin(angle) * 400f
-                    val vy = -MathUtils.cos(angle) * 400f
-                    entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 10, ProjectileOwner.ENEMY)
+            val playerPos = playerEntity?.getComponent(TransformComponent::class.java)?.position ?: Vector2(400f, 200f)
+            val dx = playerPos.x - transform.position.x
+            val dy = playerPos.y - transform.position.y
+            val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+
+            when (enemy.shootPattern) {
+                ShootPattern.STRAIGHT -> {
+                    entityFactory?.createProjectile(
+                        transform.position.x, transform.position.y,
+                        0f, -400f, 10, ProjectileOwner.ENEMY
+                    )
                 }
-            }
-            ShootPattern.SPREAD_5 -> {
-                val angles = floatArrayOf(-0.5f, -0.25f, 0f, 0.25f, 0.5f)
-                angles.forEach { angle ->
-                    val vx = MathUtils.sin(angle) * 400f
-                    val vy = -MathUtils.cos(angle) * 400f
-                    entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 10, ProjectileOwner.ENEMY)
+                ShootPattern.SPREAD_3 -> {
+                    val angles = floatArrayOf(-0.3f, 0f, 0.3f)
+                    angles.forEach { angle ->
+                        val vx = MathUtils.sin(angle) * 400f
+                        val vy = -MathUtils.cos(angle) * 400f
+                        entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 10, ProjectileOwner.ENEMY)
+                    }
                 }
-            }
-            ShootPattern.TARGETED -> {
-                if (dist > 0) {
-                    val vx = (dx / dist) * 400f
-                    val vy = (dy / dist) * 400f
-                    entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 15, ProjectileOwner.ENEMY)
+                ShootPattern.SPREAD_5 -> {
+                    val angles = floatArrayOf(-0.5f, -0.25f, 0f, 0.25f, 0.5f)
+                    angles.forEach { angle ->
+                        val vx = MathUtils.sin(angle) * 400f
+                        val vy = -MathUtils.cos(angle) * 400f
+                        entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 10, ProjectileOwner.ENEMY)
+                    }
                 }
+                ShootPattern.TARGETED -> {
+                    if (dist > 0) {
+                        val vx = (dx / dist) * 400f
+                        val vy = (dy / dist) * 400f
+                        entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 15, ProjectileOwner.ENEMY)
+                    }
+                }
+                else -> {}
             }
         }
-    }
 }
 
 class BossAISystem(priority: Int = 4) : IteratingSystem(
@@ -270,6 +273,7 @@ class BossAISystem(priority: Int = 4) : IteratingSystem(
             1 -> phase1Behavior(transform, velocity, enemy, deltaTime)
             2 -> phase2Behavior(transform, velocity, enemy, deltaTime)
             3 -> phase3Behavior(transform, velocity, enemy, deltaTime)
+            else -> {}
         }
         
         // Shooting
@@ -317,66 +321,67 @@ class BossAISystem(priority: Int = 4) : IteratingSystem(
     }
     
     private fun phase3Behavior(transform: TransformComponent, velocity: VelocityComponent, enemy: EnemyComponent, deltaTime: Float) {
-        // Aggressive targeting
-        val playerPos = playerEntity?.getComponent(TransformComponent::class.java)?.position ?: Vector2(400f, 200f)
-        val dx = playerPos.x - transform.position.x
-        val dy = playerPos.y - transform.position.y
-        val dist = MathUtils.sqrt(dx * dx + dy * dy)
-        
-        if (dist > 0) {
-            velocity.velocity.x = (dx / dist) * 180f
-            velocity.velocity.y = (dy / dist) * 180f
+            // Aggressive targeting
+            val playerPos = playerEntity?.getComponent(TransformComponent::class.java)?.position ?: Vector2(400f, 200f)
+            val dx = playerPos.x - transform.position.x
+            val dy = playerPos.y - transform.position.y
+            val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+
+            if (dist > 0) {
+                velocity.velocity.x = (dx / dist) * 180f
+                velocity.velocity.y = (dy / dist) * 180f
+            }
+            enemy.phaseTimer += deltaTime
         }
-        enemy.phaseTimer += deltaTime
-    }
     
     private fun fireBossProjectile(transform: TransformComponent, enemy: EnemyComponent) {
-        when (enemy.shootPattern) {
-            ShootPattern.BOSS_PATTERN_1 -> {
-                // 3-way spread aimed at player
-                val playerPos = playerEntity?.getComponent(TransformComponent::class.java)?.position ?: Vector2(400f, 200f)
-                val dx = playerPos.x - transform.position.x
-                val dy = playerPos.y - transform.position.y
-                val baseAngle = MathUtils.atan2(dx, -dy)
-                
-                floatArrayOf(-0.4f, 0f, 0.4f).forEach { offset ->
-                    val angle = baseAngle + offset
-                    val vx = MathUtils.sin(angle) * 350f
-                    val vy = -MathUtils.cos(angle) * 350f
-                    entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 20, ProjectileOwner.ENEMY)
+            when (enemy.shootPattern) {
+                ShootPattern.BOSS_PATTERN_1 -> {
+                    // 3-way spread aimed at player
+                    val playerPos = playerEntity?.getComponent(TransformComponent::class.java)?.position ?: Vector2(400f, 200f)
+                    val dx = playerPos.x - transform.position.x
+                    val dy = playerPos.y - transform.position.y
+                    val baseAngle = MathUtils.atan2(dx, -dy)
+
+                    floatArrayOf(-0.4f, 0f, 0.4f).forEach { offset ->
+                        val angle = baseAngle + offset
+                        val vx = MathUtils.sin(angle) * 350f
+                        val vy = -MathUtils.cos(angle) * 350f
+                        entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 20, ProjectileOwner.ENEMY)
+                    }
                 }
-            }
-            ShootPattern.BOSS_PATTERN_2 -> {
-                // Circle burst
-                repeat(12) { i ->
-                    val angle = (i * 30f) * MathUtils.degreesToRadians
-                    val vx = MathUtils.sin(angle) * 300f
-                    val vy = -MathUtils.cos(angle) * 300f
-                    entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 15, ProjectileOwner.ENEMY)
+                ShootPattern.BOSS_PATTERN_2 -> {
+                    // Circle burst
+                    repeat(12) { i ->
+                        val angle = (i * 30f) * MathUtils.degreesToRadians
+                        val vx = MathUtils.sin(angle) * 300f
+                        val vy = -MathUtils.cos(angle) * 300f
+                        entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 15, ProjectileOwner.ENEMY)
+                    }
                 }
-            }
-            ShootPattern.BOSS_PATTERN_3 -> {
-                // Targeted + circle
-                val playerPos = playerEntity?.getComponent(TransformComponent::class.java)?.position ?: Vector2(400f, 200f)
-                val dx = playerPos.x - transform.position.x
-                val dy = playerPos.y - transform.position.y
-                val dist = MathUtils.sqrt(dx * dx + dy * dy)
-                
-                if (dist > 0) {
-                    val vx = (dx / dist) * 400f
-                    val vy = (dy / dist) * 400f
-                    entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 25, ProjectileOwner.ENEMY)
+                ShootPattern.BOSS_PATTERN_3 -> {
+                    // Targeted + circle
+                    val playerPos = playerEntity?.getComponent(TransformComponent::class.java)?.position ?: Vector2(400f, 200f)
+                    val dx = playerPos.x - transform.position.x
+                    val dy = playerPos.y - transform.position.y
+                    val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+
+                    if (dist > 0) {
+                        val vx = (dx / dist) * 400f
+                        val vy = (dy / dist) * 400f
+                        entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 25, ProjectileOwner.ENEMY)
+                    }
+
+                    repeat(8) { i ->
+                        val angle = (i * 45f) * MathUtils.degreesToRadians
+                        val vx = MathUtils.sin(angle) * 250f
+                        val vy = -MathUtils.cos(angle) * 250f
+                        entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 15, ProjectileOwner.ENEMY)
+                    }
                 }
-                
-                repeat(8) { i ->
-                    val angle = (i * 45f) * MathUtils.degreesToRadians
-                    val vx = MathUtils.sin(angle) * 250f
-                    val vy = -MathUtils.cos(angle) * 250f
-                    entityFactory?.createProjectile(transform.position.x, transform.position.y, vx, vy, 15, ProjectileOwner.ENEMY)
-                }
+                else -> {}
             }
         }
-    }
 }
 
 class ProjectileSystem(priority: Int = 5) : IteratingSystem(
@@ -391,39 +396,39 @@ class ProjectileSystem(priority: Int = 5) : IteratingSystem(
     }
     
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        val transform = entity.getComponent(TransformComponent::class.java)
-        val velocity = entity.getComponent(VelocityComponent::class.java)
-        val projectile = entity.getComponent(ProjectileComponent::class.java)
-        
-        projectile.lifeTime -= deltaTime
-        
-        // Homing logic
-        if (projectile.isHoming && projectile.homingTarget >= 0 && entityFactory != null) {
-            val target = entityFactory.getEntity(projectile.homingTarget)
-            if (target != null) {
-                val targetTransform = target.getComponent(TransformComponent::class.java)
-                val dx = targetTransform.position.x - transform.position.x
-                val dy = targetTransform.position.y - transform.position.y
-                val dist = MathUtils.sqrt(dx * dx + dy * dy)
-                
-                if (dist > 0) {
-                    val speed = velocity.velocity.len()
-                    velocity.velocity.x = (dx / dist) * speed
-                    velocity.velocity.y = (dy / dist) * speed
+            val transform = entity.getComponent(TransformComponent::class.java)
+            val velocity = entity.getComponent(VelocityComponent::class.java)
+            val projectile = entity.getComponent(ProjectileComponent::class.java)
+
+            projectile.lifeTime -= deltaTime
+
+            // Homing logic
+            if (projectile.isHoming && projectile.homingTarget >= 0 && entityFactory != null) {
+                val target = entityFactory.getEntity(projectile.homingTarget)
+                if (target != null) {
+                    val targetTransform = target.getComponent(TransformComponent::class.java)
+                    val dx = targetTransform.position.x - transform.position.x
+                    val dy = targetTransform.position.y - transform.position.y
+                    val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+
+                    if (dist > 0) {
+                        val speed = velocity.velocity.len()
+                        velocity.velocity.x = (dx / dist) * speed
+                        velocity.velocity.y = (dy / dist) * speed
+                    }
+                } else {
+                    projectile.isHoming = false
+                    projectile.homingTarget = -1
                 }
-            } else {
-                projectile.isHoming = false
-                projectile.homingTarget = -1
+            }
+
+            // Despawn if off screen or lifetime expired
+            if (projectile.lifeTime <= 0f ||
+                transform.position.x < -50f || transform.position.x > screenBounds.x + 50f ||
+                transform.position.y < -50f || transform.position.y > screenBounds.y + 50f) {
+                entityFactory?.markForRemoval(entity)
             }
         }
-        
-        // Despawn if off screen or lifetime expired
-        if (projectile.lifeTime <= 0f ||
-            transform.position.x < -50f || transform.position.x > screenBounds.x + 50f ||
-            transform.position.y < -50f || transform.position.y > screenBounds.y + 50f) {
-            entityFactory?.markForRemoval(entity)
-        }
-    }
 }
 
 class CollisionSystem(priority: Int = 10) : IteratingSystem(
