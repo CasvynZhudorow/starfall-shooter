@@ -29,10 +29,10 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build Debug APK
-        run: ./gradlew :android:assembleDebug --no-daemon --stacktrace
+        run: bash ./gradlew :android:assembleDebug --no-daemon --stacktrace
 
       - name: Run Unit Tests
-        run: ./gradlew :core:test --no-daemon --stacktrace
+        run: bash ./gradlew :core:test --no-daemon --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -61,7 +61,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Android Lint
-        run: ./gradlew :android:lintDebug --no-daemon --stacktrace
+        run: bash ./gradlew :android:lintDebug --no-daemon --stacktrace
 
       - name: Upload Lint Report
         uses: actions/upload-artifact@v4
